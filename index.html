@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planning des répétitions — Metz Musical</title>
+  <meta name="description" content="Planning partagé des répétitions de Neverland Cure (Metz Musical).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23e11d48'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='Georgia'>N</text></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="eyebrow">Metz Musical · Neverland Cure</span>
+      <h1>Planning des répétitions</h1>
+    </div>
+    <div class="countdown" id="countdown" hidden></div>
+    <button class="btn ghost" id="authBtn" type="button"></button>
+  </header>
+
+  <div class="toolbar">
+    <div class="nav">
+      <button class="btn icon" id="prevBtn" type="button" aria-label="Mois précédent">‹</button>
+      <h2 id="monthLabel" aria-live="polite"></h2>
+      <button class="btn icon" id="nextBtn" type="button" aria-label="Mois suivant">›</button>
+      <button class="btn ghost" id="todayBtn" type="button">Aujourd'hui</button>
+    </div>
+    <div class="actions">
+      <div class="seg" role="tablist" aria-label="Vue">
+        <button type="button" role="tab" data-view="month" class="on">Mois</button>
+        <button type="button" role="tab" data-view="list">Liste</button>
+      </div>
+      <button class="btn ghost" id="icsBtn" type="button" title="Exporter vers Google Agenda / Apple Calendrier">Exporter .ics</button>
+      <button class="btn primary" id="addBtn" type="button">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="legend" id="legend" aria-label="Filtrer par pôle"></div>
+
+  <main>
+    <div id="status" class="status" hidden></div>
+    <section id="monthView" class="month" aria-label="Vue mensuelle">
+      <div class="dow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+      <div class="grid" id="grid"></div>
+    </section>
+    <section id="dayPanel" class="daypanel" hidden></section>
+    <section id="listView" class="list" hidden aria-label="Liste du mois"></section>
+  </main>
+
+  <footer class="foot">
+    <span id="sourceInfo"></span>
+  </footer>
+
+  <!-- Event dialog -->
+  <dialog id="eventDlg">
+    <form method="dialog" id="eventForm">
+      <header class="dlg-head">
+        <h3 id="eventDlgTitle">Nouveau créneau</h3>
+        <button class="btn icon" value="cancel" formnovalidate aria-label="Fermer">×</button>
+      </header>
+      <div class="dlg-body">
+        <label class="full">Titre
+          <input name="title" required maxlength="80" placeholder="Ex. Répétition acteurs — Acte I">
+        </label>
+        <label>Pôle
+          <select name="pole" id="poleSelect"></select>
+        </label>
+        <label>Couleur
+          <span class="colorrow">
+            <input type="color" name="color">
+            <button type="button" class="btn ghost small" id="resetColor">Couleur du pôle</button>
+          </span>
+        </label>
+        <label>Date
+          <input type="date" name="date" required>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="allDay"> Toute la journée / horaire à préciser
+        </label>
+        <label class="timeonly">Début
+          <input type="time" name="start" value="17:00" step="300">
+        </label>
+        <label class="timeonly">Fin
+          <input type="time" name="end" value="18:30" step="300">
+        </label>
+        <label class="dayonly">Jusqu'au (inclus)
+          <input type="date" name="endDate">
+        </label>
+        <label>Lieu
+          <input name="location" maxlength="80" placeholder="Ex. IRTS, Grand Amphi…">
+        </label>
+        <label class="full">Notes
+          <textarea name="notes" rows="2" maxlength="500" placeholder="Scènes travaillées, personnes convoquées…"></textarea>
+        </label>
+        <fieldset class="full repeat" id="repeatBox">
+          <label class="check"><input type="checkbox" name="repeat"> Répéter chaque semaine</label>
+          <label class="inline">jusqu'au <input type="date" name="repeatUntil"></label>
+        </fieldset>
+        <div class="full scope" id="scopeBox" hidden>
+          <span>Ce créneau fait partie d'une série.</span>
+          <label class="check"><input type="radio" name="scope" value="one" checked> Seulement celui-ci</label>
+          <label class="check"><input type="radio" name="scope" value="future"> Celui-ci et les suivants</label>
+        </div>
+        <p class="meta full" id="eventMeta"></p>
+      </div>
+      <footer class="dlg-foot">
+        <button type="button" class="btn danger" id="deleteBtn">Supprimer</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" value="cancel" formnovalidate>Annuler</button>
+        <button class="btn primary" id="saveBtn" value="save">Enregistrer</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Read-only details -->
+  <dialog id="viewDlg">
+    <div class="view-card">
+      <header class="dlg-head">
+        <h3 id="viewTitle"></h3>
+        <button class="btn icon" id="viewClose" type="button" aria-label="Fermer">×</button>
+      </header>
+      <div class="dlg-body" id="viewBody"></div>
+      <footer class="dlg-foot">
+        <span class="hint">Connectez-vous pour modifier.</span>
+        <span class="spacer"></span>
+        <button class="btn primary" id="viewLogin" type="button">Se connecter</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Auth dialog -->
+  <dialog id="authDlg">
+    <form method="dialog" id="authForm">
+      <header class="dlg-head">
+        <h3>Accès responsable</h3>
+        <button class="btn icon" value="cancel" formnovalidate aria-label="Fermer">×</button>
+      </header>
+      <div class="dlg-body">
+        <p class="full small-text">Pour ajouter ou modifier des créneaux, collez un jeton GitHub qui a le droit d'écrire dans ce dépôt. Il reste uniquement dans ce navigateur. La marche à suivre est dans le <a id="readmeLink" target="_blank" rel="noopener">README</a>.</p>
+        <label class="full">Votre prénom (affiché dans l'historique)
+          <input name="name" required maxlength="40" placeholder="Ex. Isabelle">
+        </label>
+        <label class="full">Jeton GitHub
+          <input name="token" type="password" required autocomplete="off" placeholder="github_pat_… ou ghp_…">
+        </label>
+        <p class="full err" id="authErr" hidden></p>
+      </div>
+      <footer class="dlg-foot">
+        <button type="button" class="btn danger" id="logoutBtn">Se déconnecter</button>
+        <span class="spacer"></span>
+        <button class="btn primary" value="ok">Valider</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
