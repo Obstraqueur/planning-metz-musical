@@ -18,8 +18,22 @@
       <h1>Planning des répétitions</h1>
     </div>
     <div class="countdown" id="countdown" hidden></div>
-    <button class="btn ghost" id="authBtn" type="button"></button>
+    <div class="who">
+      <button class="btn ghost" id="nameBtn" type="button" title="Changer de prénom"></button>
+      <button class="btn icon bell" id="bellBtn" type="button" aria-label="Derniers ajouts" aria-expanded="false" aria-controls="notifPanel">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg>
+        <span class="badge-count" id="bellCount" hidden></span>
+      </button>
+    </div>
   </header>
+
+  <aside id="notifPanel" class="notif" hidden aria-label="Derniers ajouts et modifications">
+    <header class="notif-head">
+      <h3>Dernières activités</h3>
+      <button class="btn icon" id="notifClose" type="button" aria-label="Fermer">×</button>
+    </header>
+    <div id="notifList" class="notif-list"></div>
+  </aside>
 
   <div class="toolbar">
     <div class="nav">
@@ -63,51 +77,59 @@
       </header>
       <div class="dlg-body">
         <label class="full">Titre
-          <input name="title" required maxlength="80" placeholder="Ex. Répétition acteurs — Acte I">
+          <input name="title" id="f-title" required maxlength="80" placeholder="Ex. Répétition acteurs — Acte I">
         </label>
         <label>Pôle
           <select name="pole" id="poleSelect"></select>
         </label>
         <label>Couleur
           <span class="colorrow">
-            <input type="color" name="color">
+            <input type="color" name="color" id="f-color">
             <button type="button" class="btn ghost small" id="resetColor">Couleur du pôle</button>
           </span>
         </label>
         <label>Date
-          <input type="date" name="date" required>
+          <input type="date" name="date" id="f-date" required>
         </label>
         <label class="check">
-          <input type="checkbox" name="allDay"> Toute la journée / horaire à préciser
+          <input type="checkbox" name="allDay" id="f-allday"> Toute la journée / horaire à préciser
         </label>
         <label class="timeonly">Début
-          <input type="time" name="start" value="17:00" step="300">
+          <input type="time" name="start" id="f-start" value="17:00" step="300">
         </label>
         <label class="timeonly">Fin
-          <input type="time" name="end" value="18:30" step="300">
+          <input type="time" name="end" id="f-end" value="18:30" step="300">
         </label>
         <label class="dayonly">Jusqu'au (inclus)
-          <input type="date" name="endDate">
+          <input type="date" name="endDate" id="f-enddate">
         </label>
         <label>Lieu
-          <input name="location" maxlength="80" placeholder="Ex. IRTS, Grand Amphi…">
+          <input name="location" id="f-location" maxlength="80" placeholder="Ex. IRTS, Grand Amphi…">
         </label>
         <label class="full">Notes
-          <textarea name="notes" rows="2" maxlength="500" placeholder="Scènes travaillées, personnes convoquées…"></textarea>
+          <textarea name="notes" id="f-notes" rows="2" maxlength="500" placeholder="Scènes travaillées, personnes convoquées…"></textarea>
         </label>
         <fieldset class="full repeat" id="repeatBox">
-          <label class="check"><input type="checkbox" name="repeat"> Répéter chaque semaine</label>
-          <label class="inline">jusqu'au <input type="date" name="repeatUntil"></label>
+          <label class="check"><input type="checkbox" name="repeat" id="f-repeat"> Répéter chaque semaine</label>
+          <label class="inline">jusqu'au <input type="date" name="repeatUntil" id="f-until"></label>
         </fieldset>
         <div class="full scope" id="scopeBox" hidden>
           <span>Ce créneau fait partie d'une série.</span>
           <label class="check"><input type="radio" name="scope" value="one" checked> Seulement celui-ci</label>
           <label class="check"><input type="radio" name="scope" value="future"> Celui-ci et les suivants</label>
         </div>
+        <label class="full signer">Votre prénom
+          <input name="author" id="f-author" required maxlength="40" placeholder="Il apparaîtra dans les notifications">
+        </label>
         <p class="meta full" id="eventMeta"></p>
       </div>
       <footer class="dlg-foot">
         <button type="button" class="btn danger" id="deleteBtn">Supprimer</button>
+        <span class="confirm" id="confirmBox" hidden>
+          Supprimer ?
+          <button type="button" class="btn danger solid small" id="confirmYes">Oui, supprimer</button>
+          <button type="button" class="btn ghost small" id="confirmNo">Non</button>
+        </span>
         <span class="spacer"></span>
         <button class="btn ghost" value="cancel" formnovalidate>Annuler</button>
         <button class="btn primary" id="saveBtn" value="save">Enregistrer</button>
@@ -115,41 +137,20 @@
     </form>
   </dialog>
 
-  <!-- Read-only details -->
-  <dialog id="viewDlg">
-    <div class="view-card">
+  <!-- Name dialog -->
+  <dialog id="nameDlg">
+    <form method="dialog" id="nameForm">
       <header class="dlg-head">
-        <h3 id="viewTitle"></h3>
-        <button class="btn icon" id="viewClose" type="button" aria-label="Fermer">×</button>
-      </header>
-      <div class="dlg-body" id="viewBody"></div>
-      <footer class="dlg-foot">
-        <span class="hint">Connectez-vous pour modifier.</span>
-        <span class="spacer"></span>
-        <button class="btn primary" id="viewLogin" type="button">Se connecter</button>
-      </footer>
-    </div>
-  </dialog>
-
-  <!-- Auth dialog -->
-  <dialog id="authDlg">
-    <form method="dialog" id="authForm">
-      <header class="dlg-head">
-        <h3>Accès responsable</h3>
+        <h3>Votre prénom</h3>
         <button class="btn icon" value="cancel" formnovalidate aria-label="Fermer">×</button>
       </header>
       <div class="dlg-body">
-        <p class="full small-text">Pour ajouter ou modifier des créneaux, collez un jeton GitHub qui a le droit d'écrire dans ce dépôt. Il reste uniquement dans ce navigateur. La marche à suivre est dans le <a id="readmeLink" target="_blank" rel="noopener">README</a>.</p>
-        <label class="full">Votre prénom (affiché dans l'historique)
-          <input name="name" required maxlength="40" placeholder="Ex. Isabelle">
+        <p class="full small-text">Tout le monde peut ajouter et modifier des créneaux. Votre prénom accompagne chacun de vos ajouts dans le centre de notifications.</p>
+        <label class="full">Prénom
+          <input name="name" id="n-name" required maxlength="40" placeholder="Ex. Isabelle">
         </label>
-        <label class="full">Jeton GitHub
-          <input name="token" type="password" required autocomplete="off" placeholder="github_pat_… ou ghp_…">
-        </label>
-        <p class="full err" id="authErr" hidden></p>
       </div>
       <footer class="dlg-foot">
-        <button type="button" class="btn danger" id="logoutBtn">Se déconnecter</button>
         <span class="spacer"></span>
         <button class="btn primary" value="ok">Valider</button>
       </footer>
@@ -158,6 +159,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
