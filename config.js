@@ -3,8 +3,8 @@ window.PLANNING_CONFIG = {
   // Projet Supabase : Project Settings → API (ou « Connect »).
   // La clé « anon » / « publishable » est faite pour être publique :
   // ce sont les règles de la base (supabase/setup.sql) qui décident de ce qui est permis.
-  supabaseUrl: "",
-  supabaseKey: "",
+  supabaseUrl: "https://uqgjfkljwqcswbkmheta.supabase.co",
+  supabaseKey: "sb_publishable_8HGi8IedITNSAIn7upmNsw_RLMkJ7iM",
 
   // Date de la représentation : sert au compte à rebours en haut de page.
   showDate: "2027-04-13",
