@@ -45,7 +45,7 @@ Cette clé est faite pour être publique. Ce sont les règles du script SQL qui 
 - **Créneau récurrent** : cochez **Répéter chaque semaine** et indiquez la date de fin.
 - **Modifier ou supprimer** : cliquez sur le créneau. Pour une série, choisissez « Seulement celui-ci » ou « Celui-ci et les suivants ».
 - **Journée entière ou plusieurs jours** : cochez **Toute la journée / horaire à préciser**, puis indiquez une date de fin si besoin.
-- **Vue Liste** : tous les mois à la suite, de la première à la dernière date ; la page s'ouvre sur les prochains créneaux et les dates passées sont grisées. Un créneau sur plusieurs jours n'apparaît qu'à sa date de début.
+- **Vue Liste** : tous les mois à la suite, de la première à la dernière date ; la page s'ouvre sur les prochains créneaux et les dates passées sont grisées. Une tâche de plus de 3 jours (achats, écriture, vacances…) n'apparaît qu'une fois, à son dernier jour, comme échéance ; un week-end reste affiché sur ses deux jours.
 - **Filtrer** : cliquez sur un pôle dans la légende pour le masquer ou l'afficher.
 - **Changer de prénom** : bouton « Prénom » en haut à droite.
 

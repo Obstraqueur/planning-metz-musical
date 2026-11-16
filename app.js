@@ -150,10 +150,16 @@
   // ---------- Queries ----------
   function eventsOn(day) {
     return state.events
-      .filter(e => !state.hidden.has(e.pole) && e.date <= day && day <= (e.endDate || e.date))
+      .filter(e => !state.hidden.has(e.pole) && (isDeadline(e) ? day === e.endDate : e.date <= day && day <= (e.endDate || e.date)))
       .sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || (a.start || "").localeCompare(b.start || "") || a.title.localeCompare(b.title));
   }
-  const timeLabel = e => e.allDay ? (e.endDate && e.endDate !== e.date ? `jusqu'au ${shortDate(e.endDate)}` : "Journée") : `${hm(e.start)}–${hm(e.end)}`;
+  // Une tâche de plus de 3 jours (achats, écriture, vacances…) n'est affichée
+  // qu'une fois, à son dernier jour, comme une échéance.
+  function isDeadline(e) { return e.allDay && e.endDate && diffDays(e.date, e.endDate) > 2; }
+  const shownOn = e => isDeadline(e) ? e.endDate : e.date;
+  const timeLabel = e => e.allDay
+    ? (isDeadline(e) ? `Échéance · depuis le ${shortDate(e.date)}` : e.endDate && e.endDate !== e.date ? `jusqu'au ${shortDate(e.endDate)}` : "Journée")
+    : `${hm(e.start)}–${hm(e.end)}`;
   const isHighlight = e => ["spectacle", "generale", "weekend"].includes(e.pole);
   const unread = () => state.activity.filter(a => state.seen && a.created_at > state.seen && a.author !== state.name);
 
@@ -271,16 +277,17 @@
       evs.length ? h("div", {}, evs.map(rowFor)) : h("p", { class: "empty" }, "Aucun créneau ce jour-là."));
   }
 
-  // Vue liste : tous les mois à la suite. Un créneau sur plusieurs jours
-  // n'apparaît qu'à sa date de début (son horaire indique « jusqu'au … »).
+  // Vue liste : tous les mois à la suite. Une échéance (tâche de plus de 3 jours)
+  // n'apparaît qu'à son dernier jour ; un week-end apparaît à son premier jour.
   function renderList() {
     const box = $("#listView"); box.replaceChildren();
     const today = todayStr();
     const byDay = new Map();
     for (const e of state.events) {
       if (state.hidden.has(e.pole)) continue;
-      if (!byDay.has(e.date)) byDay.set(e.date, []);
-      byDay.get(e.date).push(e);
+      const k = shownOn(e);
+      if (!byDay.has(k)) byDay.set(k, []);
+      byDay.get(k).push(e);
     }
     const keys = [...byDay.keys()].sort();
     let month = null, firstUpcoming = null;
@@ -291,7 +298,7 @@
         month = m;
         box.append(h("h3", { class: "month-head" }, `${MONTHS[d.getMonth()]} ${d.getFullYear()}`));
       }
-      const evs = eventsOn(key).filter(e => e.date === key);
+      const evs = eventsOn(key).filter(e => shownOn(e) === key);
       const row = h("div", { class: `day${key === today ? " today" : ""}${key < today ? " past" : ""}` },
         h("div", { class: "d" }, h("b", {}, String(d.getDate())), DAYS[d.getDay()].slice(0, 3) + "."),
         h("div", {}, evs.map(rowFor)));
