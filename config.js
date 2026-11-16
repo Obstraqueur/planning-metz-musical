@@ -7,11 +7,12 @@ window.PLANNING_CONFIG = {
   supabaseKey: "sb_publishable_8HGi8IedITNSAIn7upmNsw_RLMkJ7iM",
 
   // Date de la représentation : sert au compte à rebours en haut de page.
-  showDate: "2027-04-13",
+  showDate: "2027-03-24",
   showLabel: "la représentation",
 
   // Pôles : id (ne pas changer une fois utilisé), nom affiché, couleur.
   poles: [
+    { id: "ecriture",  name: "Écriture",               color: "#4f46e5" },
     { id: "acteurs",   name: "Acteurs",                color: "#2563eb" },
     { id: "musique",   name: "Musique",                color: "#7c3aed" },
     { id: "danse",     name: "Danse",                  color: "#c026d3" },
@@ -20,6 +21,7 @@ window.PLANNING_CONFIG = {
     { id: "weekend",   name: "Week-end de répétition", color: "#0891b2" },
     { id: "generale",  name: "Générales",              color: "#ea580c" },
     { id: "spectacle", name: "Représentation",         color: "#e11d48" },
+    { id: "jalon",     name: "Échéances",              color: "#be185d" },
     { id: "autre",     name: "Autre",                  color: "#64748b" }
   ]
 };

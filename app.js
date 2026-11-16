@@ -161,7 +161,11 @@
   function setStatus(msg) { const s = $("#status"); s.textContent = msg; s.hidden = !msg; }
 
   function render() {
-    $("#monthLabel").textContent = `${MONTHS[state.month]} ${state.year}`;
+    const isList = state.view === "list";
+    $("#monthLabel").textContent = isList ? "Tous les mois" : `${MONTHS[state.month]} ${state.year}`;
+    $("#monthLabel").classList.toggle("plain", isList);
+    $("#prevBtn").hidden = isList;
+    $("#nextBtn").hidden = isList;
     document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.view === state.view));
     $("#monthView").hidden = state.view !== "month";
     $("#listView").hidden = state.view !== "list";
@@ -267,20 +271,35 @@
       evs.length ? h("div", {}, evs.map(rowFor)) : h("p", { class: "empty" }, "Aucun créneau ce jour-là."));
   }
 
+  // Vue liste : tous les mois à la suite. Un créneau sur plusieurs jours
+  // n'apparaît qu'à sa date de début (son horaire indique « jusqu'au … »).
   function renderList() {
     const box = $("#listView"); box.replaceChildren();
-    const days = new Date(state.year, state.month + 1, 0).getDate();
     const today = todayStr();
-    for (let i = 1; i <= days; i++) {
-      const key = ymd(new Date(state.year, state.month, i));
-      const evs = eventsOn(key);
-      if (!evs.length) continue;
-      const d = parse(key);
-      box.append(h("div", { class: `day${key === today ? " today" : ""}` },
-        h("div", { class: "d" }, h("b", {}, String(d.getDate())), DAYS[d.getDay()].slice(0, 3) + "."),
-        h("div", {}, evs.map(rowFor))));
+    const byDay = new Map();
+    for (const e of state.events) {
+      if (state.hidden.has(e.pole)) continue;
+      if (!byDay.has(e.date)) byDay.set(e.date, []);
+      byDay.get(e.date).push(e);
     }
-    if (!box.children.length) box.append(h("p", { class: "empty" }, "Aucun créneau ce mois-ci."));
+    const keys = [...byDay.keys()].sort();
+    let month = null, firstUpcoming = null;
+    for (const key of keys) {
+      const d = parse(key);
+      const m = `${d.getFullYear()}-${d.getMonth()}`;
+      if (m !== month) {
+        month = m;
+        box.append(h("h3", { class: "month-head" }, `${MONTHS[d.getMonth()]} ${d.getFullYear()}`));
+      }
+      const evs = eventsOn(key).filter(e => e.date === key);
+      const row = h("div", { class: `day${key === today ? " today" : ""}${key < today ? " past" : ""}` },
+        h("div", { class: "d" }, h("b", {}, String(d.getDate())), DAYS[d.getDay()].slice(0, 3) + "."),
+        h("div", {}, evs.map(rowFor)));
+      if (!firstUpcoming && key >= today) firstUpcoming = row;
+      box.append(row);
+    }
+    if (!keys.length) box.append(h("p", { class: "empty" }, "Aucun créneau pour l'instant."));
+    state.listAnchor = firstUpcoming;
   }
 
   // ---------- Notification center ----------
@@ -552,8 +571,9 @@
   }
   $("#prevBtn").onclick = () => shiftMonth(-1);
   $("#nextBtn").onclick = () => shiftMonth(1);
-  $("#todayBtn").onclick = () => { const t = new Date(); state.year = t.getFullYear(); state.month = t.getMonth(); state.selected = isPhone() ? todayStr() : null; render(); };
-  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { state.view = b.dataset.view; store.set(LS.view, state.view); render(); });
+  const scrollToUpcoming = () => { if (state.view === "list" && state.listAnchor) state.listAnchor.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  $("#todayBtn").onclick = () => { const t = new Date(); state.year = t.getFullYear(); state.month = t.getMonth(); state.selected = isPhone() ? todayStr() : null; render(); scrollToUpcoming(); };
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { state.view = b.dataset.view; store.set(LS.view, state.view); render(); scrollToUpcoming(); });
   $("#addBtn").onclick = () => openEditor(null, state.selected || (state.month === now.getMonth() && state.year === now.getFullYear() ? todayStr() : ymd(new Date(state.year, state.month, 1))));
   $("#nameBtn").onclick = askName;
   $("#bellBtn").onclick = () => $("#notifPanel").hidden ? openNotifs() : closeNotifs();

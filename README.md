@@ -45,6 +45,7 @@ Cette clé est faite pour être publique. Ce sont les règles du script SQL qui 
 - **Créneau récurrent** : cochez **Répéter chaque semaine** et indiquez la date de fin.
 - **Modifier ou supprimer** : cliquez sur le créneau. Pour une série, choisissez « Seulement celui-ci » ou « Celui-ci et les suivants ».
 - **Journée entière ou plusieurs jours** : cochez **Toute la journée / horaire à préciser**, puis indiquez une date de fin si besoin.
+- **Vue Liste** : tous les mois à la suite, de la première à la dernière date ; la page s'ouvre sur les prochains créneaux et les dates passées sont grisées. Un créneau sur plusieurs jours n'apparaît qu'à sa date de début.
 - **Filtrer** : cliquez sur un pôle dans la légende pour le masquer ou l'afficher.
 - **Changer de prénom** : bouton « Prénom » en haut à droite.
 
@@ -60,13 +61,16 @@ En dernier recours, tout l'historique est visible dans Supabase (**Table Editor 
 - **Pôles et couleurs** : modifiez la liste `poles` dans `config.js`. Ne changez pas l'`id` d'un pôle déjà utilisé.
 - **Date de la représentation** (compte à rebours) : modifiez `showDate` dans `config.js`.
 
-## Contenu de départ
+## Rétroplanning (représentation le 24 mars 2027)
 
-| Pôle | Créneaux |
+Le rétroplanning de la troupe est dans [`supabase/retroplanning.sql`](supabase/retroplanning.sql). Pour le charger : Supabase → **SQL Editor** → **New query**, collez tout le fichier, puis **Run**. Le script retire l'ancien planning à partir du 20 novembre 2026 (copie restaurable depuis la cloche du site), ajoute les 36 créneaux du rétroplanning et ne touche pas aux créneaux ajoutés à la main. Relancé une seconde fois, il s'arrête sans rien changer.
+
+| Période | Contenu |
 | --- | --- |
-| Acteurs | Tous les jeudis de 17 h à 18 h 30 jusqu'aux vacances de Noël, puis de 17 h à 19 h de janvier au 8 avril 2027 |
-| Week-end de répétition | Samedi 3 et dimanche 4 avril 2027 |
-| Générales | Pré-générale le samedi 10 avril 2027, générale le lundi 12 avril 2027 |
-| Représentation | Mardi 13 avril 2027 |
+| 16 → 26 nov. | Fin de l'écriture ; script verrouillé le jeudi 26 |
+| Déc. → janv. | Jeudis 17 h – 19 h : mise en place des Actes I et II (+ musique certains jeudis de 19 h à 20 h 30) ; vacances pour apprendre le texte |
+| Février | Jeudis 17 h – 19 h avec musique et danse ; week-end cohésion les 20 – 21 fév. (filage complet n° 1) |
+| Mars | Jeudi 4 (17 h – 21 h) : montage des décors ; samedi 6 : filage n° 2 ; jeudis 11 et 18 ; samedi 20 : pré-générale |
+| Mercredi 24 mars | Montage à l'IRTS le matin, générale à 13 h 30, représentation à 19 h |
 
-Les pôles Musique, Danse, Décors & costumes et Répétition commune sont prêts à être remplis.
+Les achats et la fabrication des décors et des costumes, et les échéances (financement FACS, décors et costumes terminés), sont aussi dans le planning. Le week-end des 12 – 13 février est marqué indisponible.
